@@ -9,3 +9,22 @@ frontend:
     baseDirectory: /
   cache:
     paths: []
+
+# node.js 빌드 스펙 예시
+#frontend:
+#  version: 1
+#  phases:
+#    preBuild:
+#      commands:
+#        - yarn install
+#    build:
+#      commands:
+#        - yarn build
+#  artifacts:
+#    files:
+#      - '**/*'
+#    discard-path: yes
+#    baseDirectory: build
+#  cache:
+#    paths:
+#      - node_modules
