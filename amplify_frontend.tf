@@ -10,7 +10,7 @@ resource "aws_amplify_app" "main" {
   auto_branch_creation_patterns = ["*/**"]
 
   auto_branch_creation_config {
-    basic_auth_credentials = local.basic_auth_credentials
+    # basic_auth_credentials = local.basic_auth_credentials
     build_spec             = local.build_spec
     enable_auto_build      = true
     enable_basic_auth      = true
