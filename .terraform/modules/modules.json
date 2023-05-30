@@ -1,1 +1,1 @@
-{"Modules":[{"Key":"develop","Source":"./..","Dir":".."},{"Key":"","Source":"","Dir":"."}]}
+{"Modules":[{"Key":"server_api_develop","Source":"./server_api","Dir":"server_api"},{"Key":"develop","Source":"./..","Dir":".."},{"Key":"","Source":"","Dir":"."},{"Key":"database_primary_develop","Source":"./database_primary","Dir":"database_primary"},{"Key":"database_primary_develop.database_primary","Source":"registry.terraform.io/terraform-aws-modules/rds-aurora/aws","Version":"6.0.0","Dir":".terraform/modules/database_primary_develop.database_primary"}]}

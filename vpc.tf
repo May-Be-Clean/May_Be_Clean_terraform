@@ -1,171 +1,83 @@
-resource "aws_vpc" "vpc" {
-  cidr_block           = var.cidr_vpc
-  enable_dns_support   = true
-  enable_dns_hostnames = true
-
+resource "aws_vpc" "main" {
+  cidr_block = local.vpc_cidr_block
   tags = {
-    Name = "${var.project_name}-${var.environment}-vpc"
+    Name = local.vpc_name
   }
 }
 
-# Internet Gateway
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.vpc.id
-
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
   tags = {
-    Name = "${var.project_name}-${var.environment}-igw"
+    Name = local.internet_gateway_name
   }
 }
 
-
-# Default route table
-resource "aws_default_route_table" "default" {
-  default_route_table_id = aws_vpc.vpc.default_route_table_id
-
+resource "aws_eip" "nat-a" {
   tags = {
-    Name = "${var.project_name}-${var.environment}-default-rtb"
+    Name = "${local.common_project_name}-eip-nat-gateway-a"
   }
 }
 
-# Default security group
-resource "aws_default_security_group" "default" {
-  vpc_id = aws_vpc.vpc.id
-
+resource "aws_eip" "nat-c" {
   tags = {
-    Name = "${var.project_name}-${var.environment}-default-sg"
+    Name = "${local.common_project_name}-eip-nat-gateway-c"
   }
 }
 
-# Default network access list
-resource "aws_default_network_acl" "default" {
-  default_network_acl_id = aws_vpc.vpc.default_network_acl_id
-
+resource "aws_subnet" "public-a" {
+  cidr_block        = local.public_a_cidr_block
+  vpc_id            = aws_vpc.main.id
+  availability_zone = local.availability_zone_a
   tags = {
-    Name = "${var.project_name}-${var.environment}-default-nacl"
+    Name = "${local.common_project_name}-subnet-public-a"
   }
 }
 
-# Subnet
-## public1-subnet
-resource "aws_subnet" "public1" {
-  vpc_id                  = aws_vpc.vpc.id
-  availability_zone       = "ap-northeast-2a"
-  cidr_block              = var.cidr_public1
-  map_public_ip_on_launch = true
-
+resource "aws_subnet" "public-c" {
+  cidr_block        = local.public_c_cidr_block
+  vpc_id            = aws_vpc.main.id
+  availability_zone = local.availability_zone_c
   tags = {
-    Name = "${var.project_name}-${var.environment}-public1-subnet"
+    Name = "${local.common_project_name}-subnet-public-c"
   }
 }
 
-# Route table
-## public1
-resource "aws_route_table" "public1" {
-  vpc_id = aws_vpc.vpc.id
-
+resource "aws_nat_gateway" "public-a" {
+  allocation_id     = aws_eip.nat-a.id
+  connectivity_type = "public"
+  subnet_id         = aws_subnet.public-a.id
   tags = {
-    Name = "${var.project_name}-${var.environment}-public1-rtb"
+    Name = local.nat_gateway_a_name
   }
 }
 
-resource "aws_route_table_association" "public1" {
-  subnet_id      = aws_subnet.public1.id
-  route_table_id = aws_route_table.public1.id
+resource "aws_nat_gateway" "public-c" {
+  allocation_id     = aws_eip.nat-c.id
+  connectivity_type = "public"
+  subnet_id         = aws_subnet.public-c.id
+  tags = {
+    Name = local.nat_gateway_c_name
+  }
 }
 
-resource "aws_route" "public1" {
-  route_table_id         = aws_route_table.public1.id
-  gateway_id             = aws_internet_gateway.igw.id
-  destination_cidr_block = "0.0.0.0/0"
-}
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+  tags = {
+    Name = local.route_table_name
+  }
 
-# NACL
-## public1
-resource "aws_network_acl" "public1" {
-  vpc_id     = aws_vpc.vpc.id
-  subnet_ids = [aws_subnet.public1.id]
-
-  egress {
-    protocol   = -1
-    rule_no    = 100
-    action     = "allow"
+  route {
     cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-  }
-
-  ingress {
-    protocol   = -1
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-  }
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-public2-nacl"
+    gateway_id = aws_internet_gateway.main.id
   }
 }
 
-## public2-subnet
-resource "aws_subnet" "public2" {
-  vpc_id                  = aws_vpc.vpc.id
-  availability_zone       = "ap-northeast-2c"
-  cidr_block              = var.cidr_public2
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-public2-subnet"
-  }
+resource "aws_route_table_association" "public-a" {
+  route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.public-a.id
 }
 
-# Route table
-## public1
-resource "aws_route_table" "public2" {
-  vpc_id = aws_vpc.vpc.id
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-public2-rtb"
-  }
-}
-
-resource "aws_route_table_association" "public2" {
-  subnet_id      = aws_subnet.public2.id
-  route_table_id = aws_route_table.public2.id
-}
-
-resource "aws_route" "public2" {
-  route_table_id         = aws_route_table.public2.id
-  gateway_id             = aws_internet_gateway.igw.id
-  destination_cidr_block = "0.0.0.0/0"
-}
-
-# NACL
-## public1
-resource "aws_network_acl" "public2" {
-  vpc_id     = aws_vpc.vpc.id
-  subnet_ids = [aws_subnet.public2.id]
-
-  egress {
-    protocol   = -1
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-  }
-
-  ingress {
-    protocol   = -1
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-  }
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-public2-nacl"
-  }
+resource "aws_route_table_association" "public-c" {
+  route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.public-c.id
 }

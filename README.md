@@ -1,1 +1,0 @@
-# yourssu-hackathon-terraform
