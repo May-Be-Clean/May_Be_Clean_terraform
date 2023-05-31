@@ -224,6 +224,18 @@ resource "aws_elastic_beanstalk_environment" "api" {
         name  = "JAVA_TOOL_OPTIONS"
         value = "-Djava.security.properties=\"java/security/enableLegacyTLS.security\""
       },
+      {
+        name = "DATASOURCE_URL",
+        value = "jdbc:mariadb://may-be-clean-develop-database-primary.cluster-cuhxyhjtupdm.ap-northeast-2.rds.amazonaws.com:3306/may_be_clean"
+      },
+      {
+        name = "DATASOURCE_USERNAME",
+        value = "root"
+      },
+      {
+        name = "DATASOURCE_PASSWORD",
+        value = "z3xgGfViVcqWxmzXFpDe40H9ajUAQRBA"
+      }
     ]
 
     content {

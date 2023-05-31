@@ -13,7 +13,7 @@ module "server_api_develop" {
   nat-c-id                            = aws_nat_gateway.public-c.id
   backend_route53_zone_id             = aws_route53_zone.server_api.zone_id
   application_name                    = aws_elastic_beanstalk_application.server_api.name
-  deployment_policy                   = "RollingWithAdditionalBatch"
+  deployment_policy                   = "AllAtOnce"
   certificate_arn                     = aws_acm_certificate_validation.server_api.certificate_arn
   web_instance_profile                = aws_iam_instance_profile.elastic_beanstalk_instance.name
   backend_instance                    = "t2.small"

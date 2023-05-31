@@ -10,7 +10,6 @@ resource "aws_security_group" "database" {
       var.database_accessible_cidr,
       var.private_cidr,
       ["${var.tunnel_instance_ip}/32"],
-      ["121.135.170.180/32"]
     )
   }
 
